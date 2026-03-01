@@ -1,58 +1,115 @@
 const mongoose = require("mongoose");
 
-const warrantyRequestSchema = new mongoose.Schema(
-    {
-        vehicleId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Vehicle",
-            required: true,
-        },
-        customerId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-        },
-        dealerId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-        },
-
-        // STEP 1 – Personal Details
-        fullName: { type: String, required: true },
-        age: { type: Number },
-        gender: { type: String },
-
-        // STEP 2 – Contact Details
-        email: { type: String },
-        mobile: { type: String },
-        address: { type: String },
-
-        // STEP 3 – Invoice Details
-        invoiceNumber: { type: String, required: true },
-        invoiceDate: { type: Date, required: true },
-        purchaseAmount: { type: Number },
-
-        // STEP 4 – Vehicle Details (Snapshot copy)
-        vehicleNumber: { type: String },
-        model: { type: String },
-
-        // STEP 5 – Issue
-        issueDescription: {
-            type: String,
-            required: true,
-        },
-
-        status: {
-            type: String,
-            enum: ["pending", "approved", "rejected"],
-            default: "pending"
-        },
-
-    rejectionReason: { type: String },
-
+const warrantySchema = new mongoose.Schema(
+  {
+    // Reference to User (Customer)
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    { timestamps: true }
+
+    // Reference to Vehicle
+    vehicle: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vehicle",
+      required: true,
+    },
+
+    // Issue Details
+    issueCategory: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    issueTitle: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    issueDescription: {
+      type: String,
+      required: true,
+    },
+
+    issueStartDate: {
+      type: Date,
+      required: true,
+    },
+
+    odometerReading: {
+      type: Number,
+      required: true,
+    },
+
+    underWarranty: {
+      type: Boolean,
+      required: true,
+    },
+
+    previousService: {
+      type: Boolean,
+      required: true,
+    },
+
+    // Documents
+    vehicleInvoice: {
+      type: String,
+      required: true,
+    },
+
+    rcBook: {
+      type: String,
+      required: true,
+    },
+
+    serviceRecords: {
+      type: String,
+    },
+
+    problemPhotos: [
+      {
+        type: String,
+      },
+    ],
+
+    problemVideo: {
+      type: String,
+    },
+
+    // Dealer (optional if assigned later)
+    dealer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+
+    rejectionReason: {
+      type: String,
+    },
+
+    claimId: {
+      type: String,
+      unique: true,
+    },
+  },
+  { timestamps: true }
 );
 
-module.exports = mongoose.model("WarrantyRequest", warrantyRequestSchema);
+
+// Auto-generate Claim ID
+warrantySchema.pre("save", async function () {
+  if (!this.claimId) {
+    const random = Math.floor(100000 + Math.random() * 900000);
+    this.claimId = "CLM" + random;
+  }
+});
+
+module.exports = mongoose.model("Warranty", warrantySchema);

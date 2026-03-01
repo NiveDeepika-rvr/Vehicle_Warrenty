@@ -1,47 +1,25 @@
-const mongoose = require("mongoose");
-const WarrantyRequest = require("../models/Service");
+const WarrantyClaim = require("../models/Service");
 const Vehicle = require("../models/Vehicle");
-const Service = require("../models/Service");
 
 
-
-
-/*
-====================================================
-CUSTOMER – APPLY WARRANTY (Stepper Version)
-====================================================
-*/
-exports.applyWarranty = async (req, res) => {
+// ===============================
+// CREATE CLAIM (Customer Only)
+// ===============================
+exports.createClaim = async (req, res) => {
   try {
     const {
       vehicleId,
-      dealerId,
-
-      fullName,
-      age,
-      gender,
-
-      email,
-      mobile,
-      address,
-
-      invoiceNumber,
-      invoiceDate,
-      purchaseAmount,
-
-      issueDescription,
+      category,
+      title,
+      description,
+      issueStartDate,
+      odometerReading,
+      underWarranty,
+      previousService,
+      previousServiceCount,
     } = req.body;
 
-    if (!vehicleId || !dealerId || !invoiceNumber || !invoiceDate || !issueDescription) {
-      return res.status(400).json({
-        message: "Required fields missing",
-      });
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(vehicleId)) {
-      return res.status(400).json({ message: "Invalid vehicle ID" });
-    }
-
+    // Validate vehicle ownership
     const vehicle = await Vehicle.findOne({
       _id: vehicleId,
       userId: req.user._id,
@@ -51,155 +29,158 @@ exports.applyWarranty = async (req, res) => {
       return res.status(404).json({ message: "Vehicle not found" });
     }
 
-    // ✅ Check 2 year warranty validity
-    const today = new Date();
+    // Handle uploaded files
+    const files = req.files;
 
-    if (today > vehicle.warrantyExpiryDate) {
-      return res.status(400).json({
-        message: "Warranty period expired (2 years over)",
-      });
+    const vehicleInvoice =
+      files.vehicleInvoice?.[0]?.path || null;
+
+    const rcBook =
+      files.rcBook?.[0]?.path || null;
+
+    const serviceRecords =
+      files.serviceRecords?.[0]?.path || null;
+
+    const problemVideo =
+      files.problemVideo?.[0]?.path || null;
+
+    const problemPhotos =
+      files.problemPhotos?.map((f) => f.path) || [];
+
+    // Validate mandatory docs
+    if (!vehicleInvoice || !rcBook) {
+      return res
+        .status(400)
+        .json({ message: "Invoice and RC Book required" });
     }
 
-    // ✅ Auto approve initially
-    const request = await WarrantyRequest.create({
-      vehicleId,
-      customerId: req.user._id,
-      dealerId,
+    const claim = await WarrantyClaim.create({
+      user: req.user._id,
+      vehicle: vehicleId,
 
-      fullName,
-      age,
-      gender,
+      issueCategory: category,
+      issueTitle: title,
+      issueDescription: description,
+      issueStartDate,
+      odometerReading,
+      underWarranty,
+      previousService,
 
-      email,
-      mobile,
-      address,
-
-      invoiceNumber,
-      invoiceDate,
-      purchaseAmount,
-
-      vehicleNumber: vehicle.vehicleNumber,
-      model: vehicle.model,
-
-      issueDescription,
-
-      
+      vehicleInvoice,
+      rcBook,
+      serviceRecords,
+      problemPhotos,
+      problemVideo,
     });
 
-    return res.status(201).json({
-      message: "Warranty request auto-approved successfully",
-      request,
+    res.status(201).json({
+      message: "Claim submitted successfully",
+      claim,
     });
-
   } catch (error) {
-    console.error("Apply Warranty Error:", error.message);
-    return res.status(500).json({ message: "Server error" });
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
 
-
-/*
-====================================================
-2️⃣ CUSTOMER – VIEW MY REQUESTS
-====================================================
-*/
-exports.getMyWarrantyRequests = async (req, res) => {
+// ==========================================
+// GET CLAIMS (Role Based)
+// ==========================================
+exports.getClaims = async (req, res) => {
   try {
-    const requests = await WarrantyRequest.find({
-      customerId: req.user._id,
-    })
-      .populate("vehicleId")
-      .populate("dealerId", "name email mobile")
+    let filter = {};
+
+    // Customer → only own claims
+    if (req.user.role === "customer") {
+      filter.user = req.user._id;
+    }
+
+    const claims = await WarrantyClaim.find(filter)
+      .populate("user", "name email phone")
+      .populate("vehicle", "model vehicleNumber")
       .sort({ createdAt: -1 });
 
-    res.json({
-      total: requests.length,
-      requests,
-    });
-
+    res.json(claims);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 
-
-/*
-====================================================
-3️⃣ DEALER – VIEW ASSIGNED REQUESTS
-====================================================
-*/
-exports.getDealerRequests = async (req, res) => {
+// ==========================================
+// GET SINGLE CLAIM
+// ==========================================
+exports.getSingleClaim = async (req, res) => {
   try {
-    const requests = await WarrantyRequest.find({
-      dealerId: req.user._id,
-    })
-      .populate("vehicleId")
-      .populate("customerId", "name email mobile")
-      .sort({ createdAt: -1 });
+    let filter = { _id: req.params.id };
 
-    res.json({
-      total: requests.length,
-      requests,
-    });
+    if (req.user.role === "customer") {
+      filter.user = req.user._id;
+    }
 
+    const claim = await WarrantyClaim.findOne(filter)
+      .populate("user", "name email phone")
+      .populate("vehicle", "model vehicleNumber");
+
+    if (!claim) {
+      return res.status(404).json({ message: "Claim not found" });
+    }
+
+    res.json(claim);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 
-
-/*
-====================================================
-4️⃣ DEALER – APPROVE / REJECT
-====================================================
-*/
-exports.updateWarrantyStatus = async (req, res) => {
+// ==========================================
+// UPDATE STATUS (Admin / Dealer)
+// ==========================================
+exports.updateClaimStatus = async (req, res) => {
   try {
-    const { requestId, status, rejectionReason } = req.body;
+    const { status, rejectionReason } = req.body;
 
-    if (!requestId || !status) {
-      return res.status(400).json({
-        message: "Request ID and status are required"
-      });
+    const claim = await WarrantyClaim.findById(req.params.id);
+
+    if (!claim) {
+      return res.status(404).json({ message: "Claim not found" });
     }
 
-    if (!["approved", "rejected"].includes(status)) {
-      return res.status(400).json({
-        message: "Invalid status"
-      });
+    claim.status = status;
+
+    if (status === "Rejected") {
+      claim.rejectionReason = rejectionReason;
     }
 
-    const request = await WarrantyRequest.findById(requestId);
+    await claim.save();
 
-    if (!request) {
-      return res.status(404).json({ message: "Request not found" });
-    }
+    res.json({
+      message: "Claim status updated",
+      claim,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
-    // Ensure dealer owns this request
-    if (request.dealerId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
 
-    request.status = status;
-
-    if (status === "rejected") {
-      request.rejectionReason = rejectionReason || "Not specified";
-    } else {
-      request.rejectionReason = undefined;
-    }
-
-    await request.save();
-
-    return res.json({
-      message: `Warranty ${status} successfully`,
-      request
+// ==========================================
+// DELETE CLAIM (Customer Only)
+// ==========================================
+exports.deleteClaim = async (req, res) => {
+  try {
+    const claim = await WarrantyClaim.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user._id,
     });
 
+    if (!claim) {
+      return res.status(404).json({ message: "Claim not found" });
+    }
+
+    res.json({ message: "Claim deleted successfully" });
   } catch (error) {
-    console.error("Update Warranty Error:", error.message);
-    return res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: error.message });
   }
 };

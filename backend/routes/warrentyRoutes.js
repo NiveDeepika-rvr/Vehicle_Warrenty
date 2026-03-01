@@ -2,51 +2,62 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  applyWarranty,
-  getMyWarrantyRequests,
-  getDealerRequests,
-  updateWarrantyStatus,
+  createClaim,
+  getClaims,
+  getSingleClaim,
+  deleteClaim,
 } = require("../controllers/warrentyController");
 
 const { protect } = require("../middlewares/authMiddleware");
 const { authorizeRoles } = require("../middlewares/roleMiddleware");
+const upload = require("../middlewares/uploadMiddleware");
 
-/*
----------------------------------------
-Customer Routes
----------------------------------------
-*/
+// =====================================
+// CUSTOMER ONLY
+// =====================================
+
+// Create Warranty
 router.post(
-  "/apply",
+  "/create-warranty",
   protect,
   authorizeRoles("customer"),
-  applyWarranty
+  upload.fields([
+    { name: "vehicleInvoice", maxCount: 1 },
+    { name: "rcBook", maxCount: 1 },
+    { name: "serviceRecords", maxCount: 1 },
+    { name: "problemVideo", maxCount: 1 },
+    { name: "problemPhotos", maxCount: 5 },
+  ]),
+  createClaim
 );
 
-router.get(
-  "/my",
+// Delete Warranty (customer can delete own)
+router.delete(
+  "/delete-warranty/:id",
   protect,
   authorizeRoles("customer"),
-  getMyWarrantyRequests
+  deleteClaim
 );
 
-/*
----------------------------------------
-Dealer Routes
----------------------------------------
-*/
+
+// =====================================
+// CUSTOMER / DEALER / ADMIN
+// =====================================
+
+// Get All Warranties
 router.get(
-  "/dealer",
+  "/get-warranties",
   protect,
-  authorizeRoles("dealer"),
-  getDealerRequests
+  authorizeRoles("customer", "dealer", "admin"),
+  getClaims
 );
 
-router.put(
-  "/update-status",
+// Get Single Warranty
+router.get(
+  "/get-warranty/:id",
   protect,
-  authorizeRoles("dealer"),
-  updateWarrantyStatus
+  authorizeRoles("customer", "dealer", "admin"),
+  getSingleClaim
 );
 
 module.exports = router;

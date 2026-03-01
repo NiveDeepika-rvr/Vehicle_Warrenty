@@ -24,7 +24,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicle", vehicleRoutes);
 app.use("/api/warranty", warrantyRoutes);
-
+app.use("/uploads", express.static("uploads"));
 // Default Route
 app.get("/", (req, res) => {
   res.send("Warranty Claim Backend Running");

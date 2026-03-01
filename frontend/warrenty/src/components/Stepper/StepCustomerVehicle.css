@@ -1,0 +1,112 @@
+/* Container */
+.scv-container {
+  display: flex;
+  justify-content: center;
+  animation: scv-slideIn 0.4s ease;
+}
+
+/* Card */
+.scv-card {
+  width: 100%;
+  max-width: 1700px;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Main Title */
+.scv-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+/* Subtitle */
+.scv-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+/* Section Title */
+.scv-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #1f2937;
+}
+
+/* Divider */
+.scv-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 25px 0;
+}
+
+/* Grid */
+.scv-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.scv-two-col {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Field */
+.scv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Full width */
+.scv-full {
+  grid-column: span 2;
+}
+
+/* Label */
+.scv-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Input */
+.scv-field input,
+.scv-field select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+/* Focus */
+.scv-field input:focus,
+.scv-field select:focus {
+  border-color: #1e3a8a;
+  outline: none;
+}
+
+/* Disabled */
+.scv-disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+/* Animation */
+@keyframes scv-slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

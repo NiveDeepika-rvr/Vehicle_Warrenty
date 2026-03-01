@@ -12,6 +12,9 @@ const generateToken = (id, role) => {
 // =======================
 // REGISTER (Customer Only)
 // =======================
+// =======================
+// REGISTER (Customer Only)
+// =======================
 exports.registerUser = async (req, res) => {
   try {
     const { name, email, mobile, password } = req.body;
@@ -38,14 +41,14 @@ exports.registerUser = async (req, res) => {
       role: "customer",
     });
 
-    const token = generateToken(user._id, user.role);
+    // ❌ REMOVE TOKEN FROM HERE
 
     res.status(201).json({
+      message: "Registration successful. Please login.",
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
-      token,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

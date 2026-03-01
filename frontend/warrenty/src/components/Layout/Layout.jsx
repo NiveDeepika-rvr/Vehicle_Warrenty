@@ -1,7 +1,6 @@
 import React from "react";
 import { Layout } from "antd";
-import Navbar from "../Navbar/Navbar";
-
+import Navbar from "../Home/Navbar";
 const { Content } = Layout;
 
 const MainLayout = ({ children }) => {

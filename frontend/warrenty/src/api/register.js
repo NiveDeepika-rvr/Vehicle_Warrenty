@@ -16,14 +16,9 @@ export const registerUser = async (userData) => {
       throw new Error(data.message || "Registration failed");
     }
 
-    // ✅ Store token in localStorage
-    if (data.token) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("user", JSON.stringify(data));
-    }
-
+    // ✅ NO TOKEN STORAGE HERE ANYMORE
     return data;
+
   } catch (error) {
     throw error;
   }

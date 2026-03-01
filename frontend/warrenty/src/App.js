@@ -6,22 +6,72 @@ import Register from "./components/Register/Register";
 import AdminDashboard from "./components/Admin/AdminDashboard";
 import DealerDashboard from "./components/Dealer/Dealer";
 import CustomerDashboard from "./components/Customer/Customer";
+import Home from "./components/Home/Home";
+import WarrantyClaimStepper from "./components/Stepper/WarrantyClaimStepper";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+
 import "antd/dist/reset.css";
+
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Default Route - Login Page */}
+        {/* Public Routes */}
         <Route path="/" element={<Login />} />
-
-        {/* Register Route */}
         <Route path="/register" element={<Register />} />
 
-        {/* Redirect any unknown route to Login */}
+        {/* Protected Common Route */}
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Route */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Dealer Route */}
+        <Route
+          path="/dealer"
+          element={
+            <ProtectedRoute allowedRoles={["dealer"]}>
+              <DealerDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Customer Route */}
+        <Route
+          path="/customer"
+          element={
+            <ProtectedRoute allowedRoles={["customer"]}>
+              <CustomerDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Warranty Route (Customer Only Example) */}
+        <Route
+          path="/warranty"
+          element={
+            <ProtectedRoute allowedRoles={["customer"]}>
+              <WarrantyClaimStepper />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch All */}
         <Route path="*" element={<Navigate to="/" replace />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/dealer" element={<DealerDashboard />} />
-        <Route path="/customer" element={<CustomerDashboard />} />
       </Routes>
     </Router>
   );

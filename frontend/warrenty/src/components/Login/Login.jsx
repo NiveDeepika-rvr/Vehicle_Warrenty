@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Login.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -32,6 +32,19 @@ const Login = () => {
   });
   const navigate = useNavigate();
 
+  useEffect(() => {
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter" && !isRegister) {
+      handleLogin();
+    }
+  };
+
+  window.addEventListener("keydown", handleKeyPress);
+
+  return () => {
+    window.removeEventListener("keydown", handleKeyPress);
+  };
+}, [loginData, isRegister]);
   /* HANDLE CHANGE */
   const handleChange = (e, type) => {
     const { name, value } = e.target;
@@ -98,7 +111,7 @@ const Login = () => {
       navigate("/dealer");
     } 
     else {
-      navigate("/customer");
+      navigate("/home");
     }
 
     // Clear form
