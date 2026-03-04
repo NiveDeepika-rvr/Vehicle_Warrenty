@@ -1,63 +1,323 @@
+/* =========================
+   DEALER DASHBOARD LAYOUT
+========================= */
+
 .dealer-container {
-  padding: 30px;
+  padding: 30px 40px;
   width: 100%;
+  min-height: 100vh;
+  background: #f4f6f9; /* calm gray background */
 }
 
-.dealer-container h2 {
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+/* =========================
+   TABLE WRAPPER
+========================= */
 
 .table-wrapper {
+  margin-top: 25px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
   overflow-x: auto;
+  padding: 0;
 }
+
+/* =========================
+   TABLE STYLING
+========================= */
 
 table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
+  font-size: 14px;
 }
+
+/* ===== HEADER (Soft Calm) ===== */
 
 thead {
-  background: #1677ff;
-  color: white;
+  background: #eef2f7; /* soft bluish-gray */
 }
 
-th, td {
-  padding: 12px;
+th {
+  padding: 16px 14px;
+  font-weight: 600;
   text-align: center;
+  color: #334155;
+  font-size: 13px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e2e8f0;
 }
 
+/* ===== BODY ===== */
+
+td {
+  padding: 16px 14px;
+  text-align: center;
+  vertical-align: middle;
+  color: #475569;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Alternating row color (mild child color) */
+tbody tr:nth-child(even) {
+  background: #fafbfd;
+}
+
+/* Soft hover effect */
 tbody tr:hover {
-  background: #f5f5f5;
+  background: #f1f5f9;
+  transition: background 0.2s ease;
 }
 
+/* =========================
+   STATUS BADGES (Calm)
+========================= */
+
+.status-badge {
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Pending (soft amber) */
+.status-badge.pending {
+  background-color: #fef9c3;
+  color: #854d0e;
+}
+
+/* Approved (soft green) */
+.status-badge.approved,
+.status-badge.dealerApproved {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+/* Rejected (soft red) */
+.status-badge.rejected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* =========================
+   ACTION BUTTONS (Soft UI)
+========================= */
+
+.actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Common Button Base */
 .actions button {
-  margin: 4px;
-  padding: 6px 10px;
+  padding: 8px 16px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
-  border-radius: 6px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
+/* Soft Hover */
+.actions button:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+/* Preview Button */
+.preview-btn {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.preview-btn:hover {
+  background: #bae6fd;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(3, 105, 161, 0.15);
+}
+
+/* Approve */
 .approve {
-  background: #22c55e;
-  color: white;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #bbf7d0;
 }
 
-.reject {
-  background: #ef4444;
-  color: white;
+.approve:hover {
+  background: #d1fae5;
 }
+
+/* Reject */
+.reject {
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+
+.reject:hover {
+  background: #fecaca;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(127, 29, 29, 0.15);
+}
+
+/* Disabled (optional improvement) */
+.actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+/* =========================
+   NO DATA
+========================= */
 
 .no-data {
-  padding: 20px;
+  padding: 30px;
   font-weight: 500;
+  color: #64748b;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+  th,
+  td {
+    font-size: 12px;
+    padding: 10px 6px;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+/* =========================
+   MODAL PREVIEW CONTENT
+========================= */
+
+.preview-content {
+  padding: 10px 5px;
+}
+
+.preview-content h3 {
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-size: 16px;
+  color: #111827;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+
+.preview-content p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+/* =========================
+   IMAGE GRID (Upload Files)
+========================= */
+
+.preview-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.preview-image {
+  width: 130px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.preview-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+
+  .preview-image {
+    width: 100px;
+    height: 80px;
+  }
+}
+.service-count {
+  font-weight: 600;
+  color: #1f2937;
+  margin-left: 5px;
+}
+/* =========================
+   TABLE HEADER (TITLE + REFRESH)
+========================= */
+
+.table-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+
+/* Refresh Button */
+
+.refresh-btn {
+  background: #eef2ff;
+  color: #4338ca;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.refresh-btn:hover {
+  background: #e0e7ff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(67, 56, 202, 0.15);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Spin Animation */
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

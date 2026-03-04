@@ -1,0 +1,89 @@
+/* Wrapper */
+.dealer-cards-wrapper {
+  width: 100%;
+  padding: 100px 40px 40px 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 25px;
+}
+
+/* Base Card */
+.dealer-stat-card {
+  border-radius: 18px !important;
+  transition: all 0.35s ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Hover Animation */
+.dealer-stat-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+/* Card Content */
+.dealer-card-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Icon */
+.dealer-card-icon {
+  font-size: 30px;
+  opacity: 0.9;
+}
+
+/* Info */
+.dealer-card-info {
+  text-align: right;
+}
+
+.dealer-card-value {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.dealer-card-title {
+  font-size: 15px;
+  margin: 0;
+  opacity: 0.85;
+}
+
+/* Calm Color Themes */
+
+/* 1 - Soft Blue */
+.dealer-card-theme-1 {
+  background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+  color: #0c4a6e;
+}
+
+/* 2 - Soft Green */
+.dealer-card-theme-2 {
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  color: #14532d;
+}
+
+/* 3 - Soft Red */
+.dealer-card-theme-3 {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #7f1d1d;
+}
+
+/* 4 - Soft Yellow */
+.dealer-card-theme-4 {
+  background: linear-gradient(135deg, #fef9c3, #fde68a);
+  color: #78350f;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dealer-cards-wrapper {
+    padding: 90px 20px 20px 20px;
+  }
+
+  .dealer-card-value {
+    font-size: 26px;
+  }
+}

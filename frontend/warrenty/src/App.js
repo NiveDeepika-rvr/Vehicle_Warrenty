@@ -13,6 +13,8 @@ import AddVehicle from "./components/Vehicle/AddVehicle";
 import "antd/dist/reset.css";
 import ClaimsTable from './components/Stepper/ClaimTable'
 import Profile from './components/Profile/ProfilePage'
+import HistoryUser from "./components/HistoryUser/HistoryUser";
+import DealerDashboardHome from './components/Dealer/DealerDashboard.jsx/DealerDashboard'
 function App() {
   return (
     <Router>
@@ -55,6 +57,13 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route 
+          path="/dealer/history"
+          element={<HistoryUser/>}/>
+        
+        <Route
+          path="/dealer/home"
+          element={<DealerDashboardHome/>}/>
 
         {/* Customer Route */}
         <Route

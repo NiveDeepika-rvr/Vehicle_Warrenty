@@ -53,6 +53,10 @@ const warrantySchema = new mongoose.Schema(
       type: Boolean,
       required: true,
     },
+    previousServiceCount: {
+  type: Number,
+  default: 0,
+},
 
     // Documents
     vehicleInvoice: {

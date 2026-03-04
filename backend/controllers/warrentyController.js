@@ -5,6 +5,85 @@ const Vehicle = require("../models/Vehicle");
 // ===============================
 // CREATE CLAIM (Customer Only)
 // ===============================
+// exports.createClaim = async (req, res) => {
+//   try {
+//     const {
+//       vehicleId,
+//       category,
+//       title,
+//       description,
+//       issueStartDate,
+//       odometerReading,
+//       underWarranty,
+//       previousService,
+//       previousServiceCount,
+//     } = req.body;
+
+//     // Validate vehicle ownership
+//     const vehicle = await Vehicle.findOne({
+//       _id: vehicleId,
+//       userId: req.user._id,
+//     });
+
+//     if (!vehicle) {
+//       return res.status(404).json({ message: "Vehicle not found" });
+//     }
+
+//     // Handle uploaded files
+//     const files = req.files;
+
+//     const vehicleInvoice =
+//       files.vehicleInvoice?.[0]?.path || null;
+
+//     const rcBook =
+//       files.rcBook?.[0]?.path || null;
+
+//     const serviceRecords =
+//       files.serviceRecords?.[0]?.path || null;
+
+//     const problemVideo =
+//       files.problemVideo?.[0]?.path || null;
+
+//     const problemPhotos =
+//       files.problemPhotos?.map((f) => f.path) || [];
+
+//     // Validate mandatory docs
+//     if (!vehicleInvoice || !rcBook) {
+//       return res
+//         .status(400)
+//         .json({ message: "Invoice and RC Book required" });
+//     }
+
+//    const claim = await WarrantyClaim.create({
+//   user: req.user._id,
+//   vehicle: vehicleId,
+
+//   issueCategory: category,
+//   issueTitle: title,
+//   issueDescription: description,
+//   issueStartDate,
+//   odometerReading,
+//   underWarranty,
+//   previousService,
+
+//   vehicleInvoice,
+//   rcBook,
+//   serviceRecords,
+//   problemPhotos,
+//   problemVideo,
+
+// });
+
+//     res.status(201).json({
+//       message: "Claim submitted successfully",
+//       claim,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
 exports.createClaim = async (req, res) => {
   try {
     const {
@@ -19,7 +98,6 @@ exports.createClaim = async (req, res) => {
       previousServiceCount,
     } = req.body;
 
-    // Validate vehicle ownership
     const vehicle = await Vehicle.findOne({
       _id: vehicleId,
       userId: req.user._id,
@@ -29,50 +107,55 @@ exports.createClaim = async (req, res) => {
       return res.status(404).json({ message: "Vehicle not found" });
     }
 
-    // Handle uploaded files
     const files = req.files;
 
-    const vehicleInvoice =
-      files.vehicleInvoice?.[0]?.path || null;
+    const vehicleInvoice = files.vehicleInvoice?.[0]?.path || null;
+    const rcBook = files.rcBook?.[0]?.path || null;
+    const serviceRecords = files.serviceRecords?.[0]?.path || null;
+    const problemVideo = files.problemVideo?.[0]?.path || null;
+    const problemPhotos = files.problemPhotos?.map((f) => f.path) || [];
 
-    const rcBook =
-      files.rcBook?.[0]?.path || null;
-
-    const serviceRecords =
-      files.serviceRecords?.[0]?.path || null;
-
-    const problemVideo =
-      files.problemVideo?.[0]?.path || null;
-
-    const problemPhotos =
-      files.problemPhotos?.map((f) => f.path) || [];
-
-    // Validate mandatory docs
     if (!vehicleInvoice || !rcBook) {
       return res
         .status(400)
         .json({ message: "Invoice and RC Book required" });
     }
 
-   const claim = await WarrantyClaim.create({
-  user: req.user._id,
-  vehicle: vehicleId,
+    // ===============================
+    // VALIDATION FOR PREVIOUS SERVICE
+    // ===============================
+    let serviceCount = 0;
 
-  issueCategory: category,
-  issueTitle: title,
-  issueDescription: description,
-  issueStartDate,
-  odometerReading,
-  underWarranty,
-  previousService,
+    if (previousService === "true" || previousService === true) {
+      if (!previousServiceCount || previousServiceCount <= 0) {
+        return res.status(400).json({
+          message: "Please enter valid previous service count",
+        });
+      }
 
-  vehicleInvoice,
-  rcBook,
-  serviceRecords,
-  problemPhotos,
-  problemVideo,
+      serviceCount = Number(previousServiceCount);
+    }
 
-});
+    const claim = await WarrantyClaim.create({
+      user: req.user._id,
+      vehicle: vehicleId,
+
+      issueCategory: category,
+      issueTitle: title,
+      issueDescription: description,
+      issueStartDate,
+      odometerReading,
+      underWarranty: underWarranty === "true" || underWarranty === true,
+      previousService:
+        previousService === "true" || previousService === true,
+      previousServiceCount: serviceCount,
+
+      vehicleInvoice,
+      rcBook,
+      serviceRecords,
+      problemPhotos,
+      problemVideo,
+    });
 
     res.status(201).json({
       message: "Claim submitted successfully",
@@ -83,7 +166,6 @@ exports.createClaim = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 // ==========================================
 // GET CLAIMS (Role Based)
@@ -234,6 +316,41 @@ exports.deleteClaim = async (req, res) => {
     }
 
     res.json({ message: "Claim deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// ======================================
+// CUSTOMER HISTORY (Approved / Rejected)
+// ======================================
+exports.getUserHistory = async (req, res) => {
+  try {
+    const claims = await WarrantyClaim.find({
+      user: req.user._id,
+      status: { $in: ["approved", "rejected"] },
+    })
+      .populate("vehicle")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: claims.length,
+      claims,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+exports.getDealerProcessedClaims = async (req, res) => {
+  try {
+    const claims = await WarrantyClaim.find({
+      status: { $in: ["approved", "rejected"] },
+    })
+      .populate("user vehicle")
+      .sort({ updatedAt: -1 });
+
+    res.status(200).json(claims);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

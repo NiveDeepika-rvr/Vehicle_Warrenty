@@ -6,7 +6,9 @@ const {
   getClaims,
   getSingleClaim,
   deleteClaim,
-  updateClaimStatus, // ✅ ADD THIS
+  updateClaimStatus,
+  getUserHistory,getDealerProcessedClaims
+   // ✅ ADD THIS
 } = require("../controllers/warrentyController");
 
 const { protect } = require("../middlewares/authMiddleware");
@@ -40,6 +42,15 @@ router.put(
   authorizeRoles("dealer", "admin"),
   updateClaimStatus
 );
+// =====================================
+// CUSTOMER HISTORY (Approved / Rejected Only)
+// =====================================
+router.get(
+  "/history",
+  protect,
+  authorizeRoles("dealer"),
+  getUserHistory
+);
 
 // Delete Warranty (customer can delete own)
 router.delete(
@@ -68,6 +79,13 @@ router.get(
   protect,
   authorizeRoles("customer", "dealer", "admin"),
   getSingleClaim
+);
+
+router.get(
+  "/dealer-history",
+  protect,
+  authorizeRoles("dealer", "admin"),
+  getDealerProcessedClaims
 );
 
 module.exports = router;
